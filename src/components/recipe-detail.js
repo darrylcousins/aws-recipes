@@ -14,7 +14,6 @@ import faTrashAlt from '@fortawesome/fontawesome-free-solid/faTrashAlt'
 
 import Loading from './loading'
 import Error from './error'
-import { ListStyle } from '../utils/style'
 
 import * as queries from '../graphql/queries'
 
@@ -37,7 +36,7 @@ export default class RecipeDetail extends React.Component {
 
           return (
             <Fragment>
-              <ul className="list fr" style={ ListStyle }>
+              <ul className="list fr">
                 <li className="dib mr2">
                   <Link
                     className="f6 f5-ns b db link dim"

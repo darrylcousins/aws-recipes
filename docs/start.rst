@@ -6,6 +6,14 @@ stack.  However setting up Couchbase on AWS requires a costly EC2 instance. So
 I moved to using DynamoDB_, then I swapped out Apollo in favour of Amplify_
 which gives me a set of tools to update the schema automatically.
 
+Node
+====
+
+Install and run::
+
+   npm install
+   npm start
+
 Codegen
 =======
 

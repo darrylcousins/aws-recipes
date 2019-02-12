@@ -15,7 +15,6 @@ import Input from './form/input.js'
 import TextArea from './form/textarea.js'
 import Message from './form/message.js'
 import Style from './form/style'
-import { ListStyle } from '../utils/style'
 
 import * as mutations from '../graphql/mutations'
 
@@ -84,7 +83,7 @@ export default class RecipeCreate extends React.Component {
     return (
       <Fragment>
         <div className="fr">
-          <ul className="list" style={ ListStyle }>
+          <ul className="list">
             <li className="dib mr2">
               <Link
                 className="f6 f5-ns b db link dim"

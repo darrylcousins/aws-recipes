@@ -19,7 +19,6 @@ import Message from './form/message.js'
 import Style from './form/style'
 import Loading from './loading'
 import Error from './error'
-import { ListStyle } from '../utils/style'
 
 import * as queries from '../graphql/queries'
 import * as mutations from '../graphql/mutations'
@@ -103,7 +102,7 @@ export default class RecipeUpdate extends React.Component {
           return (
             <Fragment>
               <div className="fr">
-                <ul className="list" style={ ListStyle }>
+                <ul className="list">
                   <li className="dib mr2">
                     <Link
                       className="f6 f5-ns b db link dim"
