@@ -61,7 +61,7 @@ export default class RecipeList extends React.Component {
         <Fragment key={ idx }>
           <Link
             className="link db dim mb1 mt0"
-            to={ `/recipes/${ entry.id }` }>
+            to={ `/recipes/${ entry.id }/${ entry.title }` }>
             <div className="pa1 grow">
               <h3 className="navy">
                 { entry.title }
@@ -79,12 +79,12 @@ export default class RecipeList extends React.Component {
             <div className="fr">
               <Link
                 className="ma1 f6 f5-ns b db link dim dib"
-                to={ `/recipes/${ entry.id }/edit` }>
+                to={ `/recipes/${ entry.id }/${ entry.title }/edit` }>
                 <FontAwesomeIcon icon={ faEdit } color="navy" />
               </Link>
               <Link
                 className="ma1 f6 f5-ns b db link dim dib"
-                to={ `/recipes/${ entry.id }/delete` }>
+                to={ `/recipes/${ entry.id }/${ entry.title }/delete` }>
                 <FontAwesomeIcon icon={ faTrashAlt } color="navy" />
               </Link>
             </div>

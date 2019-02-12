@@ -89,6 +89,7 @@ export default class RecipeUpdate extends React.Component {
 
     const vars = {
       id: this.props.match.params.id,
+      title: this.props.match.params.title
     }
     return (
       <Connect
@@ -98,7 +99,7 @@ export default class RecipeUpdate extends React.Component {
           if (loading) return <Loading />
           if (errors.length) return <Error data={ errors } />
 
-          console.log(data.getRecipe.ingredients)
+          console.log("#####", data.getRecipe)
           return (
             <Fragment>
               <div className="fr">
@@ -113,7 +114,7 @@ export default class RecipeUpdate extends React.Component {
                   <li className="dib mr2">
                     <Link
                       className="f6 f5-ns b db link dim"
-                      to={ `/recipes/${ this.props.match.params.id }` }>
+                      to={ `/recipes/${ this.props.match.params.id }/${ this.props.match.params.title }` }>
                       <FontAwesomeIcon icon={ faEye } color="navy" />
                     </Link>
                   </li>
@@ -135,7 +136,7 @@ export default class RecipeUpdate extends React.Component {
                     title: data.getRecipe.title,
                     byline: data.getRecipe.byline,
                     method: data.getRecipe.method,
-                    ingredients: data.getRecipe.ingredients.join('\n'),
+                    ingredients: data.getRecipe.ingredients,
                   }
                 }
                   >

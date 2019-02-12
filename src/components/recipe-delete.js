@@ -55,7 +55,8 @@ export default class RecipeDelete extends React.Component {
 
   render() {
     const vars = {
-      id: this.props.match.params.id
+      id: this.props.match.params.id,
+      title: this.props.match.params.title
     }
     return (
       <Connect
@@ -79,7 +80,7 @@ export default class RecipeDelete extends React.Component {
                   <li className="dib mr2">
                     <Link
                       className="f6 f5-ns b db link dim"
-                      to={ `/recipes/${ this.props.match.params.id }` }>
+                      to={ `/recipes/${ this.props.match.params.id }/${ this.props.match.params.title }` }>
                       <FontAwesomeIcon icon={ faEye } color="navy" />
                     </Link>
                   </li>
@@ -97,7 +98,8 @@ export default class RecipeDelete extends React.Component {
                 validate={ this.validate }
                 defaultValues={
                   {
-                    id: this.props.match.params.id
+                    id: this.props.match.params.id,
+                    title: this.props.match.params.title
                   }
                 }
                   >
@@ -110,6 +112,10 @@ export default class RecipeDelete extends React.Component {
                     <Text
                       type="hidden"
                       name ="id"
+                    />
+                    <Text
+                      type="hidden"
+                      name ="title"
                     />
                     <div className="fr">
                       <button

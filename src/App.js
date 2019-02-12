@@ -10,7 +10,6 @@ import {
   Switch
 } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
-import { withAuthenticator } from 'aws-amplify-react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import faGithub from '@fortawesome/fontawesome-free-brands/faGithub'
@@ -71,9 +70,9 @@ class App extends Component {
                       <Route exact path="/" component={ Index } />
                       <Route exact path="/recipes" component={ RecipeList } />
                       <Switch>
-                        <Route path="/recipes/:id/edit" component={ RecipeUpdate } />
+                        <Route path="/recipes/:id/:title/edit" component={ RecipeUpdate } />
                         <Route exact path="/recipes/create" component={ RecipeCreate } />
-                        <Route path="/recipes/:id" component={ RecipeDetail } />
+                        <Route path="/recipes/:id/:title" component={ RecipeDetail } />
                       </Switch>
                     </section>
                   </div>
@@ -88,4 +87,4 @@ class App extends Component {
 }
 
 //export default App
-export default withAuthenticator(App, {includeGreetings: true});
+export default App

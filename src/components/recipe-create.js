@@ -6,6 +6,7 @@ import React, { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { Form } from 'react-form'
 import { toast } from 'react-toastify'
+import UUID from 'uuid'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import faList from '@fortawesome/fontawesome-free-solid/faList'
@@ -56,6 +57,7 @@ export default class RecipeCreate extends React.Component {
 
     const now = new Date()
 
+    data.id = UUID.v4()
     data.ctime = now
     data.mtime = now
     data.ingredients = data.ingredients.split("\n")

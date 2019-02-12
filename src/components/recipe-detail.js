@@ -24,7 +24,8 @@ export default class RecipeDetail extends React.Component {
 
   render() {
     const vars = {
-      id: this.props.match.params.id
+      id: this.props.match.params.id,
+      title: this.props.match.params.title
     }
     return (
       <Connect
@@ -33,6 +34,8 @@ export default class RecipeDetail extends React.Component {
         {({ data, loading, errors }) => {
           if (loading) return <Loading />
           if (errors.length) return <Error data={ errors } />
+
+          console.log(data)
 
           return (
             <Fragment>
@@ -47,14 +50,14 @@ export default class RecipeDetail extends React.Component {
                 <li className="dib mr2">
                   <Link
                     className="f6 f5-ns b db link dim"
-                    to={ `/recipes/${ this.props.match.params.id }/edit` }>
+                    to={ `/recipes/${ this.props.match.params.id }/${ this.props.match.params.title }/edit` }>
                     <FontAwesomeIcon icon={ faEdit } color="navy" />
                   </Link>
                 </li>
                 <li className="dib mr2">
                   <Link
                     className="f6 f5-ns b db link dim"
-                    to={ `/recipes/${ this.props.match.params.id }/delete` }>
+                    to={ `/recipes/${ this.props.match.params.id }/${ this.props.match.params.title }/delete` }>
                     <FontAwesomeIcon icon={ faTrashAlt } color="navy" />
                   </Link>
                 </li>
@@ -73,7 +76,7 @@ export default class RecipeDetail extends React.Component {
                 dangerouslySetInnerHTML={{ __html: marked(data.getRecipe.byline) }} />
               <div>
                 <strong className="db mb2 small-caps">ingredients:</strong>
-                { data.getRecipe.ingredients.map((item, idx) => (
+                { data.getRecipe.ingredients.split(",").map((item, idx) => (
                   <div
                     key={ idx }
                     className="ml2 db">{ item }</div>
