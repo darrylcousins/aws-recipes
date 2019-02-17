@@ -5,6 +5,7 @@
 import React, { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import marked from 'marked'
+import { Grid, Header, Input, List, Segment } from 'semantic-ui-react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import faEdit from '@fortawesome/fontawesome-free-solid/faEdit'
@@ -58,73 +59,48 @@ export default class RecipeList extends React.Component {
 
     const SummaryList = ({ items }) => (
       items.map((entry, idx) => (
-        <Fragment key={ idx }>
+        <Segment key={ idx }>
           <Link
             className="link db dim mb1 mt0"
             to={ `/recipes/${ entry.id }/${ entry.title }` }>
-            <div className="pa1 grow">
-              <h3 className="navy">
+            <Header as="h3">
                 { entry.title }
-              </h3>
-              <div
-                className="near-black mb0"
-                dangerouslySetInnerHTML={{ __html: marked(entry.byline) }} />
-            </div>
+            </Header>
+            <div dangerouslySetInnerHTML={{ __html: marked(entry.byline) }} />
           </Link>
-          <div className="w-100 bb">
-            <div className="fl small-caps dark-gray">
-              <span>last modified: </span>
-              <span className="f6">{ new Date(entry.mtime).toLocaleString() }</span>
-            </div>
-            <div className="fr">
-              <Link
-                className="ma1 f6 f5-ns b db link dim dib"
-                to={ `/recipes/${ entry.id }/${ entry.title }/edit` }>
-                <FontAwesomeIcon icon={ faEdit } color="navy" />
-              </Link>
-              <Link
-                className="ma1 f6 f5-ns b db link dim dib"
-                to={ `/recipes/${ entry.id }/${ entry.title }/delete` }>
-                <FontAwesomeIcon icon={ faTrashAlt } color="navy" />
-              </Link>
-            </div>
-            <div className="cf" />
-          </div>
-        </Fragment>
+          <span>last modified: { new Date(entry.mtime).toLocaleString() }</span>
+          <Link
+            className="ma1 f6 f5-ns b db link dim dib"
+            to={ `/recipes/${ entry.id }/${ entry.title }/edit` }>
+            <FontAwesomeIcon icon={ faEdit } color="navy" />
+          </Link>
+          <Link
+            className="ma1 f6 f5-ns b db link dim dib"
+            to={ `/recipes/${ entry.id }/${ entry.title }/delete` }>
+            <FontAwesomeIcon icon={ faTrashAlt } color="navy" />
+          </Link>
+        </Segment>
       ))
     )
 
     return (
-      <Fragment>
+      <Segment>
         <Link
-          className="f6 f5-ns b db link dim orange fr"
           to={ `/recipes/create` }>
           <FontAwesomeIcon icon={ faPlus } color="red" />
         </Link>
-        <h1 className="navy">Recipes</h1>
-        <label className="absolute pa0 ma0 o-0" htmlFor="searchTerm">Search term</label>
-        <div className="relative mt2 mb3 dt dib w-100">
-          <div className="pointer w3 bg-light-gray b--black-20 ba br-0 pa2 br2 br--left dtc dib tc">
-            <FontAwesomeIcon icon={ faSearch } />
-          </div>
-          <input
-            className="dtc pa2 b--black-20 dib bt bb bw1 w-100"
-            autoFocus={ true }
-            id="searchTerm"
-            ref={ this.searchInput }
-            type="text"
-            onChange={ this.handleSearch }
-            value={ this.state.searchTerm }
-            placeholder="Search..." />
-          <div className="pointer w2 bg-light-gray b--black-20 ba bl-0 pa2 br2 br--right dtc dib tc"
-            onClick={ () => {
-              this.searchInput.current.value = ''
-              }}
-              >
-            <FontAwesomeIcon
-              icon={ faTimes } />
-          </div>
-        </div>
+        <Header as="h3">Recipes</Header>
+        <label htmlFor="searchTerm">Search term</label>
+        <FontAwesomeIcon icon={ faSearch } />
+        <input
+          className="dtc pa2 b--black-20 dib bt bb bw1 w-100"
+          autoFocus={ true }
+          id="searchTerm"
+          ref={ this.searchInput }
+          type="text"
+          onChange={ this.handleSearch }
+          value={ this.state.searchTerm }
+          placeholder="Search..." />
         <Connect
           query={ graphqlOperation(queries.listRecipes, variables) }
           >
@@ -136,7 +112,7 @@ export default class RecipeList extends React.Component {
             )
           }}
         </Connect>
-      </Fragment>
+      </Segment>
     )
   }
 
