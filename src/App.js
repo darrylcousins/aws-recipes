@@ -85,7 +85,7 @@ class HeaderMenu extends React.Component {
       searchInputValue
     } = this.state
     return (
-      <Menu secondary stackable>
+      <Menu stackable inverted>
         <Menu.Item
           name="recipes"
           active={ activeItem === "recipes" }
@@ -93,6 +93,17 @@ class HeaderMenu extends React.Component {
           Recipes&nbsp;<small>v0.1.0</small>
         </Menu.Item>
         <Menu.Menu position="right">
+          <Menu.Item
+            name="login"
+            active={ activeItem === "login" }
+            onClick={ this.handleItemClick }>
+            <Icon name="sign-in" />Login
+          </Menu.Item>
+          <Menu.Item
+            href="https://github.com/darrylcousins/aws-nautilus"
+            target="_blank">
+            <Icon name="github" />Github
+          </Menu.Item>
           <Menu.Item>
             <Input
               loading={ false }
@@ -108,17 +119,6 @@ class HeaderMenu extends React.Component {
           </Menu.Item>
           <Menu.Item>
             <RecipeAdd { ...this.props } />
-          </Menu.Item>
-          <Menu.Item
-            name="login"
-            active={ activeItem === "login" }
-            onClick={ this.handleItemClick }>
-            <Icon name="sign-in" />Login
-          </Menu.Item>
-          <Menu.Item
-            href="https://github.com/darrylcousins/aws-nautilus"
-            target="_blank">
-            <Icon name="github" />Github
           </Menu.Item>
         </Menu.Menu>
       </Menu>
@@ -181,6 +181,112 @@ class RecipeAdd extends Component {
   }
 }
 
+class RecipeUpdateModal extends Component {
+
+  constructor(props) {
+    super()
+    this.handleUpdate = this.handleUpdate.bind(this)
+    this.state = {
+      modalOpen: false,
+      data: {
+        id: "",
+        title: "",
+        byline: "",
+        ingredients: "",
+        ctime: null,
+        mtime: null
+      }
+    }
+  }
+
+  handleOpen = () => this.setState({ modalOpen: true })
+  handleClose = () => this.setState({ modalOpen: false })
+  handleCancel = () => this.setState({ modalOpen: false })
+
+  handleInputChange = (e) => {
+    const target = e.target
+    const value = target.value
+    const name = target.name
+    console.log(name, value)
+    let data = this.state.data
+    data[name] = value
+    this.setState({ data: data })
+  }
+
+  async handleUpdate() {
+
+    const { id, header } = this.props
+    const data = {
+      id: id,
+      title: header
+    }
+
+    const Toast = ({ entry }) => (
+        <Fragment>
+          <span>{ entry.title }</span> updated. <Icon name="check" />
+        </Fragment>
+    )
+
+    try {
+      const result = await API.graphql(graphqlOperation(mutations.updateRecipe, {input: data}))
+      const entry = result.data.updateRecipe
+      console.log("Result: ", entry)
+      toast.success(<Toast entry={ entry } />, {
+        onClose: this.props.successCallback
+      })
+    } catch (error) {
+      console.log("Caught error: ", error)
+      toast.error("Update failed")
+    } finally {
+      this.setState({ modalOpen: false })
+    }
+  }
+
+  render() {
+    const { id, header } = this.props
+    const { data } = this.state
+    return (
+      <Modal
+        trigger={ <Button
+                    basic
+                    id={ id }
+                    name={ header }
+                    onClick={ this.handleOpen }><Icon name="edit" />Edit</Button>
+                    }
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        basic size='small'>
+        <Header icon='edit' content='Edit Recipe' />
+        <Modal.Content>
+          <p>
+            Edit form placeholder for <strong>{ header }?</strong>
+          </p>
+          <Input
+            type='text'
+            name='title'
+            value={ data.title ? data.title : header}
+            onChange={ this.handleInputChange }
+          />
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            onClick={ this.handleCancel }
+            color='red'
+            inverted>
+            <Icon name='remove' /> Cancel
+          </Button>
+          <Button
+            onClick={ this.handleDelete }
+            color='green'
+            inverted>
+            <Icon name='checkmark' /> Save
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+}
+
 class RecipeDeleteModal extends Component {
 
   constructor(props) {
@@ -223,7 +329,6 @@ class RecipeDeleteModal extends Component {
       this.setState({ modalOpen: false })
     }
   }
-
 
   render() {
     const { id, header } = this.props
@@ -278,17 +383,18 @@ class RecipeList extends Component {
       {_.map(this.props.items, card => (
         <Card key={card.header}>
           <Card.Content>
-            <Card.Header>{card.header}</Card.Header>
-            <Card.Meta>{card.date}</Card.Meta>
+            <Card.Header>{card.item.title}</Card.Header>
+            <Card.Meta>{card.meta}</Card.Meta>
             <Card.Description>{card.description}</Card.Description>
           </Card.Content>
           <Card.Content extra>
             <div className='ui two buttons'>
-              <Button
-                basic
+              <RecipeUpdateModal
+                { ...this.props }
+                item={ card.item }
                 id={ card.id }
-                name={ card.header }
-                onClick={ this.handleEdit }><Icon name="edit" />Edit</Button>
+                header={ card.header }
+              />
               <RecipeDeleteModal
                 { ...this.props }
                 id={ card.id }
@@ -331,6 +437,7 @@ class RecipeListLoader extends Component {
           if (errors.length) return <Error data={ errors } />
 
           const cards = data.listRecipes.items.map(item => ({
+            item: item,
             header: item.title,
             meta: "Last updated: " + new Date(item.mtime).toLocaleString(),
             description: item.byline,
@@ -349,7 +456,7 @@ class RecipeListLoader extends Component {
 class App extends Component {
 
   state = {
-    searchTerm: ""
+    searchTerm: "",
   }
 
   handleSearch = (value) => this.setState({ searchTerm: value })
@@ -360,7 +467,7 @@ class App extends Component {
 
   render() {
     const {
-      searchTerm
+      searchTerm,
     } = this.state
 
     return (
