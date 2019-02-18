@@ -1,8 +1,8 @@
 // eslint-disable
 // this is an auto generated file. This will be overwritten
 
-export const getRecipe = `query GetRecipe($id: ID!, $title: String!) {
-  getRecipe(id: $id, title: $title) {
+export const getRecipe = `query GetRecipe($id: ID!) {
+  getRecipe(id: $id) {
     id
     title
     byline

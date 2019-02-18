@@ -5,46 +5,54 @@
 import React, { Component, Fragment } from 'react'
 import {
   BrowserRouter as Router,
-  withRouter,
   Route,
-  Switch
 } from 'react-router-dom'
 import {
-  Grid,
   Header,
   Input,
-  List,
-  Segment,
   Menu,
   Container,
   Card,
-  Dimmer,
   Loader,
   Button,
   Modal,
+  Form,
+  TextArea,
   Icon
 } from 'semantic-ui-react'
 import UUID from 'uuid'
 import _ from 'lodash'
 import { toast, ToastContainer } from 'react-toastify'
 
-import Error from './components/error'
 import * as queries from './graphql/queries'
 import * as mutations from './graphql/mutations'
-import * as subscriptions from './graphql/subscriptions'
 
 import { Connect } from "aws-amplify-react"
 import { graphqlOperation, API } from "aws-amplify"
-
-import RecipeCreate from './components/recipe-create'
-import RecipeDetail from './components/recipe-detail'
-import RecipeUpdate from './components/recipe-update'
 
 import 'react-toastify/dist/ReactToastify.min.css'
 import './App.css'
 
 const WAIT_INTERVAL = 1000
 const ENTER_KEY = 13
+
+const Error = (errors) => {
+  console.log('In error componenent', errors)
+  return (
+    <Fragment>
+      <h3>Error</h3>
+      <ul className="list">
+        {  errors.data.map((error, idx) =>
+          <li key={ idx }>
+            <strong className="db mb2">{ error.errorType }</strong>
+            <span className="db mb2">{ error.message }</span>
+            <em className="db">{ error.path }</em>
+          </li>
+        )}
+      </ul>
+    </Fragment>
+  )
+}
 
 class HeaderMenu extends React.Component {
 
@@ -186,40 +194,40 @@ class RecipeUpdateModal extends Component {
   constructor(props) {
     super()
     this.handleUpdate = this.handleUpdate.bind(this)
+    this.defaultInput = {
+          id: "",
+          title: "",
+          byline: "",
+          ingredients: "",
+          ctime: null,
+          mtime: null
+    }
     this.state = {
       modalOpen: false,
-      data: {
-        id: "",
-        title: "",
-        byline: "",
-        ingredients: "",
-        ctime: null,
-        mtime: null
-      }
+      input: Object.assign({}, this.defaultInput)
     }
   }
 
   handleOpen = () => this.setState({ modalOpen: true })
-  handleClose = () => this.setState({ modalOpen: false })
-  handleCancel = () => this.setState({ modalOpen: false })
+  handleClose = () => this.setState({
+    modalOpen: false,
+    input: Object.assign({}, this.defaultInput)
+  })
 
   handleInputChange = (e) => {
     const target = e.target
     const value = target.value
     const name = target.name
     console.log(name, value)
-    let data = this.state.data
-    data[name] = value
-    this.setState({ data: data })
+    let input = this.state.input
+    input[name] = value
+    this.setState({ input: input })
   }
 
   async handleUpdate() {
 
-    const { id, header } = this.props
-    const data = {
-      id: id,
-      title: header
-    }
+    const { input } = this.state
+    const { item } = this.props
 
     const Toast = ({ entry }) => (
         <Fragment>
@@ -227,8 +235,17 @@ class RecipeUpdateModal extends Component {
         </Fragment>
     )
 
+    const now = new Date()
+    input.mtime = now
+    input.ctime = item.ctime
+    input.id = item.id
+    input.title = input.title ? input.title: item.title
+    input.byline = input.byline ? input.byline: item.byline
+    input.ingredients = input.ingredients ? input.ingredients: item.ingredients
+    input.method = input.method ? input.method: item.method
+
     try {
-      const result = await API.graphql(graphqlOperation(mutations.updateRecipe, {input: data}))
+      const result = await API.graphql(graphqlOperation(mutations.updateRecipe, {input: input}))
       const entry = result.data.updateRecipe
       console.log("Result: ", entry)
       toast.success(<Toast entry={ entry } />, {
@@ -243,8 +260,8 @@ class RecipeUpdateModal extends Component {
   }
 
   render() {
-    const { id, header } = this.props
-    const { data } = this.state
+    const { id, header, item } = this.props
+    const { input } = this.state
     return (
       <Modal
         trigger={ <Button
@@ -256,27 +273,51 @@ class RecipeUpdateModal extends Component {
         open={this.state.modalOpen}
         onClose={this.handleClose}
         basic size='small'>
-        <Header icon='edit' content='Edit Recipe' />
+        <Header icon='edit' content={ `Edit ${ header }` } />
         <Modal.Content>
-          <p>
-            Edit form placeholder for <strong>{ header }?</strong>
-          </p>
-          <Input
-            type='text'
-            name='title'
-            value={ data.title ? data.title : header}
-            onChange={ this.handleInputChange }
-          />
+          <Form inverted>
+            <Form.Input
+              required
+              label="Title"
+              name="title"
+              value={ input.title ? input.title : header}
+              onChange={ this.handleInputChange }
+            />
+            <Form.Field
+              required
+              control={ TextArea }
+              label="Byline"
+              name="byline"
+              value={ input.byline ? input.byline : item.byline}
+              onChange={ this.handleInputChange }
+            />
+            <Form.Field
+              required
+              control={ TextArea }
+              label="Ingredients"
+              name="ingredients"
+              value={ input.ingredients ? input.ingredients : item.ingredients}
+              onChange={ this.handleInputChange }
+            />
+            <Form.Field
+              required
+              control={ TextArea }
+              label="Method"
+              name="method"
+              value={ input.method ? input.method : item.method}
+              onChange={ this.handleInputChange }
+            />
+          </Form>
         </Modal.Content>
         <Modal.Actions>
           <Button
-            onClick={ this.handleCancel }
+            onClick={ this.handleClose }
             color='red'
             inverted>
             <Icon name='remove' /> Cancel
           </Button>
           <Button
-            onClick={ this.handleDelete }
+            onClick={ this.handleUpdate }
             color='green'
             inverted>
             <Icon name='checkmark' /> Save
@@ -305,8 +346,7 @@ class RecipeDeleteModal extends Component {
 
     const { id, header } = this.props
     const data = {
-      id: id,
-      title: header
+      id: id
     }
 
     const Toast = ({ entry }) => (
@@ -343,7 +383,7 @@ class RecipeDeleteModal extends Component {
         open={this.state.modalOpen}
         onClose={this.handleClose}
         basic size='small'>
-        <Header icon='trash' content='Delete Recipe' />
+        <Header icon='trash' content={ `Delete ${ header }` } />
         <Modal.Content>
           <p>
             Are you sure you want to delete the recipe <strong>{ header }?</strong>
@@ -411,26 +451,15 @@ class RecipeList extends Component {
 
 class RecipeListLoader extends Component {
 
-  onNewRecipe = (prev, { onCreateRecipe }) => {
-    // subscription not working!!
-    let updated= Object.assign({}, prev)
-    updated.listRecipes.items = prev.listRecipes.items.concat([onCreateRecipe])
-    console.log("New Data: " + onCreateRecipe)
-    console.log("Updated query: " + updated)
-    return updated
-  }
-
   render() {
     const { searchTerm } = this.props
     let search = searchTerm ? { title: { contains: searchTerm } } : null
-    let variables = { filter: null}
+    let variables = { filter: null }
     if (search) variables.filter = search
 
     return (
       <Connect
         query={ graphqlOperation(queries.listRecipes, variables) }
-        subscription={ graphqlOperation(subscriptions.onCreateRecipe) }
-        onSubscriptionMsg={ this.onNewRecipe }
         >
         {({ data, loading, errors }) => {
           if (loading) return <Loader active />
@@ -457,17 +486,19 @@ class App extends Component {
 
   state = {
     searchTerm: "",
+    listKey: UUID.v4()
   }
 
   handleSearch = (value) => this.setState({ searchTerm: value })
-  // attempt to reload list on create and delete
+  // the magic arbitary change to force reload on the recipe list
   onRecipeListChange = () => {
-    console.log("On recipe change detected")
+    this.setState({ listKey: UUID.v4() })
   }
 
   render() {
     const {
       searchTerm,
+      listKey,
     } = this.state
 
     return (
@@ -490,15 +521,11 @@ class App extends Component {
             path='/'
             render = { props => <RecipeListLoader
               { ...props }
+              key={ listKey }
               successCallback={ this.onRecipeListChange }
               searchTerm={ searchTerm } />
               }
             />
-          <Switch>
-            <Route path="/recipes/:id/:title/edit" component={ RecipeUpdate } />
-            <Route exact path="/recipes/create" component={ RecipeCreate } />
-            <Route path="/recipes/:id/:title" component={ RecipeDetail } />
-          </Switch>
       </Container>
       </Router>
     )
