@@ -20,8 +20,8 @@ export const onCreateRecipe = `subscription OnCreateRecipe(
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;
@@ -44,8 +44,8 @@ export const onUpdateRecipe = `subscription OnUpdateRecipe(
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;
@@ -68,8 +68,8 @@ export const onDeleteRecipe = `subscription OnDeleteRecipe(
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;

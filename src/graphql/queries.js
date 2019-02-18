@@ -8,8 +8,8 @@ export const getRecipe = `query GetRecipe($id: ID!) {
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;
@@ -25,8 +25,8 @@ export const listRecipes = `query ListRecipes(
       byline
       ingredients
       method
-      mtime
       ctime
+      mtime
     }
     nextToken
   }

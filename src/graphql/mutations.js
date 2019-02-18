@@ -8,8 +8,8 @@ export const createRecipe = `mutation CreateRecipe($input: CreateRecipeInput!) {
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;
@@ -20,8 +20,8 @@ export const updateRecipe = `mutation UpdateRecipe($input: UpdateRecipeInput!) {
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;
@@ -32,8 +32,8 @@ export const deleteRecipe = `mutation DeleteRecipe($input: DeleteRecipeInput!) {
     byline
     ingredients
     method
-    mtime
     ctime
+    mtime
   }
 }
 `;

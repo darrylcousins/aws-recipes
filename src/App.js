@@ -145,7 +145,6 @@ class RecipeAdd extends Component {
     const data = { title: title }
     const now = new Date()
 
-    data.id = UUID.v4()
     data.ctime = now
     data.mtime = now
     data.byline = "Please edit and add byline"
@@ -165,6 +164,7 @@ class RecipeAdd extends Component {
       toast.success(<Toast entry={ entry } />, {
         onClose: this.props.successCallback
       })
+      this.setState({ newTitle: "" })
     } catch (error) {
       console.log("Caught error: ", error)
       toast.error("Create failed")
@@ -172,7 +172,7 @@ class RecipeAdd extends Component {
   }
 
   render() {
-    const { recipeTitle } = this.state
+    const { newTitle } = this.state
     return (
       <Input
         loading={ false }
@@ -181,8 +181,8 @@ class RecipeAdd extends Component {
         icon='plus'
         iconPosition='left'
         action={{ content: 'Add', onClick: this.handleAddRecipe }}
-        name='albumName'
-        value={ recipeTitle }
+        name='recipeTitle'
+        value={ newTitle }
         onChange={ this.handleRecipeTitle }
       />
     )
@@ -218,7 +218,6 @@ class RecipeUpdateModal extends Component {
     const target = e.target
     const value = target.value
     const name = target.name
-    console.log(name, value)
     let input = this.state.input
     input[name] = value
     this.setState({ input: input })
@@ -333,21 +332,16 @@ class RecipeDeleteModal extends Component {
   constructor(props) {
     super()
     this.handleDelete = this.handleDelete.bind(this)
-    this.state = {
-      modalOpen: false
-    }
+    this.state = { modalOpen: false }
   }
 
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
-  handleCancel = () => this.setState({ modalOpen: false })
+  handleCancel = () => this.handleClose()
 
   async handleDelete() {
 
-    const { id, header } = this.props
-    const data = {
-      id: id
-    }
+    const data = { id: this.props.id }
 
     const Toast = ({ entry }) => (
         <Fragment>
@@ -358,7 +352,7 @@ class RecipeDeleteModal extends Component {
     try {
       const result = await API.graphql(graphqlOperation(mutations.deleteRecipe, {input: data}))
       const entry = result.data.deleteRecipe
-      console.log("Result: ", entry)
+      console.log("Deleted: ", entry)
       toast.success(<Toast entry={ entry } />, {
         onClose: this.props.successCallback
       })
@@ -505,7 +499,7 @@ class App extends Component {
       <Router>
         <Container>
           <ToastContainer
-            autoClose={ 2000 }
+            autoClose={ 1000 }
           />
           <Route
             path='/'
