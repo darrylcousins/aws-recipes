@@ -54,6 +54,32 @@ const Error = (errors) => {
   )
 }
 
+class AuthButton extends React.Component {
+
+  render() {
+    const { authState, activeItem, handleItemClick } = this.props
+    console.log('AuthButton', authState)
+    if (authState === "signedIn") {
+      return (
+        <Menu.Item
+          name="logout"
+          active={ activeItem === "logout" }
+          onClick={ handleItemClick }>
+          <Icon name="sign-out" />Logout
+        </Menu.Item>
+      )
+    }
+    return (
+      <Menu.Item
+        name="login"
+        active={ activeItem === "login" }
+        onClick={ handleItemClick }>
+        <Icon name="sign-in" />Login
+      </Menu.Item>
+    )
+  }
+}
+
 class HeaderMenu extends React.Component {
 
   constructor(props) {
@@ -92,6 +118,7 @@ class HeaderMenu extends React.Component {
       activeItem,
       searchInputValue
     } = this.state
+    const { authState } = this.props
     return (
       <Menu stackable inverted>
         <Menu.Item
@@ -101,12 +128,10 @@ class HeaderMenu extends React.Component {
           Recipes&nbsp;<small>v0.1.0</small>
         </Menu.Item>
         <Menu.Menu position="right">
-          <Menu.Item
-            name="login"
-            active={ activeItem === "login" }
-            onClick={ this.handleItemClick }>
-            <Icon name="sign-in" />Login
-          </Menu.Item>
+          <AuthButton
+            authState={ authState }
+            activeItem={ activeItem }
+            handleItemClick={ this.handleItemClick } />
           <Menu.Item
             href="https://github.com/darrylcousins/aws-nautilus"
             target="_blank">
@@ -402,6 +427,33 @@ class RecipeDeleteModal extends Component {
   }
 }
 
+class Controls extends Component {
+
+  render() {
+    const { authState, card } = this.props
+    if ( authState === "signedIn" ) {
+      return (
+        <Card.Content extra>
+          <div className='ui two buttons'>
+            <RecipeUpdateModal
+              { ...this.props }
+              item={ card.item }
+              id={ card.id }
+              header={ card.header }
+            />
+            <RecipeDeleteModal
+              { ...this.props }
+              id={ card.id }
+              header={ card.header }
+            />
+          </div>
+        </Card.Content>
+      )
+    }
+    return null
+  }
+}
+
 class RecipeList extends Component {
 
   handleEdit = (e) => {
@@ -421,21 +473,7 @@ class RecipeList extends Component {
             <Card.Meta>{card.meta}</Card.Meta>
             <Card.Description>{card.description}</Card.Description>
           </Card.Content>
-          <Card.Content extra>
-            <div className='ui two buttons'>
-              <RecipeUpdateModal
-                { ...this.props }
-                item={ card.item }
-                id={ card.id }
-                header={ card.header }
-              />
-              <RecipeDeleteModal
-                { ...this.props }
-                id={ card.id }
-                header={ card.header }
-              />
-            </div>
-          </Card.Content>
+          <Controls { ...this.props } card={ card } />
         </Card>
       ))}
       </Card.Group>
@@ -494,6 +532,7 @@ class App extends Component {
       searchTerm,
       listKey,
     } = this.state
+    const { authState } = this.props
 
     return (
       <Router>
@@ -507,6 +546,7 @@ class App extends Component {
               { ...props }
               successCallback={ this.onRecipeListChange }
               searchTerm={ searchTerm }
+              authState={ authState }
               handleSearch={ this.handleSearch } />
               }
             />
@@ -516,6 +556,7 @@ class App extends Component {
             render = { props => <RecipeListLoader
               { ...props }
               key={ listKey }
+              authState={ authState }
               successCallback={ this.onRecipeListChange }
               searchTerm={ searchTerm } />
               }
