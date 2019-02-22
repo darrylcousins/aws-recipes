@@ -28,7 +28,7 @@ The simple steps to get started were::
 The files `src/aws-exports.js` and `src/graphql/*.js` have been created.
 
 Updating the schema
---------------------------------
+-------------------
 
 From the `AppSync Console`_ the schema can be updated which will also then
 generate the DynamoDB_ tables necessary to store the data.
@@ -38,6 +38,15 @@ After any updates to the API's schema then the client code can be regenerated
 with that final command::
 
    amplify codegen
+
+Struggling Here
+---------------
+
+Finding myself deleting everything on aws in order to update dynamodb. So I delete everything on aws service, the app, dynamodb, bucket, auth, ...
+
+And then start again with::
+
+   amplify init
 
 .. _`AppSync Console`: http://console.amazon.com/appsync
 .. _DynamoDB: http://aws.amazon.com/dynamodb

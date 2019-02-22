@@ -7,45 +7,71 @@ import ReactDOM from 'react-dom'
 import * as serviceWorker from './serviceWorker'
 
 // Global amplify configure!!
-import Amplify from "aws-amplify"
+import Amplify, { Auth } from "aws-amplify"
 import aws_config from "./aws-exports"
-import { SignIn } from 'aws-amplify-react'
-import { Authenticator } from "aws-amplify-react"
+import { Authenticator, SignUp } from "aws-amplify-react"
 
 import App from './App'
-import { CustomSignIn } from './Auth'
 import './index.css'
 
 Amplify.configure(aws_config)
 
-// theme failed
-const Theme = {
-  SignInButton: { 'backgroundColor': 'blue' }
-}
-
 class AppWithAuth extends React.Component {
+
   constructor(props, context) {
     super(props, context)
-    this.state = { authState: null }
+    this.state = {
+      authenticatedUser: "guest"
+    }
+    this.authenticatedUserValidStates = [
+      "guest",
+      "authenticating",
+      "authenticated"
+    ]
     this.handleAuthStateChange = this.handleAuthStateChange.bind(this)
+    this.handleAuthentication = this.handleAuthentication.bind(this)
   }
 
-
   handleAuthStateChange(state) {
-    this.setState({ authState: state })
-    console.log("in index.js", state)
+    switch (state) {
+      case "signedIn":
+        this.setState({ authState: state, authenticatedUser: "authenticated" })
+        break
+      default:
+        this.setState({ authState: state, authenticatedUser: "guest" })
+    }
+  }
+
+  handleAuthentication(action) {
+    if (action === "login") {
+      this.setState({
+        authenticatedUser: "authenticating"
+      })
+    } else if (action === "logout") {
+      // log out the user
+      Auth.signOut()
+    }
   }
 
   render() {
+    const { authenticatedUser } = this.state
+    let hideDefault = false
+    if (authenticatedUser === "guest" || authenticatedUser === "authenticated") {
+      hideDefault = true
+    }
     return (
-    <Fragment>
-      <Authenticator
-        onStateChange={ this.handleAuthStateChange }
-        theme={ Theme }
-      >
-        <App authState={ this.state.authState } />
-      </Authenticator>
-    </Fragment>
+      <Fragment>
+        <Authenticator
+          authState="signIn"
+          hideDefault={ hideDefault }
+          hide={ [SignUp] }
+          onStateChange={ this.handleAuthStateChange }
+        >
+          <App
+            handleAuthentication={ this.handleAuthentication }
+          />
+        </Authenticator>
+      </Fragment>
     )
   }
 }

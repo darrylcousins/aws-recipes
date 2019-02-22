@@ -21,14 +21,14 @@ import {
   Icon
 } from 'semantic-ui-react'
 import UUID from 'uuid'
-import _ from 'lodash'
 import { toast, ToastContainer } from 'react-toastify'
+import { Auth } from "aws-amplify"
 
 import * as queries from './graphql/queries'
 import * as mutations from './graphql/mutations'
 
 import { Connect } from "aws-amplify-react"
-import { graphqlOperation, API } from "aws-amplify"
+import { graphqlOperation, API, Storage } from "aws-amplify"
 
 import 'react-toastify/dist/ReactToastify.min.css'
 import './App.css'
@@ -57,15 +57,23 @@ const Error = (errors) => {
 class AuthButton extends React.Component {
 
   render() {
-    const { authState, activeItem, handleItemClick } = this.props
-    console.log('AuthButton', authState)
+    const {
+      handleAuthentication,
+      authState,
+      activeItem,
+      username
+    } = this.props
+    let action = "login"
+    console.log("butto", username)
+
     if (authState === "signedIn") {
+      action = "logout"
       return (
         <Menu.Item
           name="logout"
           active={ activeItem === "logout" }
-          onClick={ handleItemClick }>
-          <Icon name="sign-out" />Logout
+          onClick={ () => handleAuthentication(action) }>
+          <Icon name="sign-out" />Logout { username }
         </Menu.Item>
       )
     }
@@ -73,7 +81,7 @@ class AuthButton extends React.Component {
       <Menu.Item
         name="login"
         active={ activeItem === "login" }
-        onClick={ handleItemClick }>
+        onClick={ () => handleAuthentication(action) }>
         <Icon name="sign-in" />Login
       </Menu.Item>
     )
@@ -118,7 +126,11 @@ class HeaderMenu extends React.Component {
       activeItem,
       searchInputValue
     } = this.state
-    const { authState } = this.props
+    const {
+      authState,
+      username,
+      handleAuthentication
+    } = this.props
     return (
       <Menu stackable inverted>
         <Menu.Item
@@ -128,15 +140,6 @@ class HeaderMenu extends React.Component {
           Recipes&nbsp;<small>v0.1.0</small>
         </Menu.Item>
         <Menu.Menu position="right">
-          <AuthButton
-            authState={ authState }
-            activeItem={ activeItem }
-            handleItemClick={ this.handleItemClick } />
-          <Menu.Item
-            href="https://github.com/darrylcousins/aws-nautilus"
-            target="_blank">
-            <Icon name="github" />Github
-          </Menu.Item>
           <Menu.Item>
             <Input
               loading={ false }
@@ -150,9 +153,18 @@ class HeaderMenu extends React.Component {
               value={ searchInputValue }
               placeholder='Search Recipes' />
           </Menu.Item>
-          <Menu.Item>
-            <RecipeAdd { ...this.props } />
+          <RecipeAdd { ...this.props } />
+          <Menu.Item
+            href="https://github.com/darrylcousins/aws-nautilus"
+            target="_blank">
+            <Icon name="github" />
           </Menu.Item>
+          <AuthButton
+            authState={ authState }
+            username={ username }
+            handleAuthentication={ handleAuthentication }
+            activeItem={ activeItem }
+            handleItemClick={ this.handleItemClick } />
         </Menu.Menu>
       </Menu>
     )
@@ -198,23 +210,81 @@ class RecipeAdd extends Component {
 
   render() {
     const { newTitle } = this.state
+    const { authState } = this.props
+    if ( authState === "signedIn") {
+      return (
+        <Menu.Item>
+          <Input
+            loading={ false }
+            type='text'
+            placeholder='Enter Recipe Title'
+            icon='plus'
+            iconPosition='left'
+            action={{ content: 'Add', onClick: this.handleAddRecipe }}
+            name='recipeTitle'
+            value={ newTitle }
+            onChange={ this.handleRecipeTitle }
+          />
+        </Menu.Item>
+      )
+    }
+    return null
+  }
+}
+
+class S3ImageUpload extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { uploading: false }
+  }
+
+  uploadFile = async (file) => {
+    const fileName = UUID.v4();
+
+    const result = await Storage.put(
+      fileName, file, {
+          customPrefix: { public: 'uploads/' },
+          metadata: { recipeid: this.props.recipeId }
+        }
+      )
+
+    console.log('Uploaded file: ', result);
+  }
+
+  onChange = async (e) => {
+    this.setState({uploading: true});
+    let files = [];
+    for (var i=0; i<e.target.files.length; i++) {
+      files.push(e.target.files.item(i));
+    }
+    await Promise.all(files.map(f => this.uploadFile(f)));
+
+    this.setState({uploading: false});
+  }
+
+  render() {
     return (
-      <Input
-        loading={ false }
-        type='text'
-        placeholder='Enter Recipe Title'
-        icon='plus'
-        iconPosition='left'
-        action={{ content: 'Add', onClick: this.handleAddRecipe }}
-        name='recipeTitle'
-        value={ newTitle }
-        onChange={ this.handleRecipeTitle }
-      />
+      <Fragment>
+        <Button
+          basic
+          disabled={this.state.uploading}
+          name={ this.state.uploading ? 'Uploading...' : 'Add Images' }
+          onClick={() => document.getElementById('add-image-file-input').click()}
+          ><Icon name="image" />Add Images</Button>
+        <input
+          id='add-image-file-input'
+          type="file"
+          accept='image/*'
+          multiple
+          onChange={ this.onChange }
+          style={{ display: 'none' }}
+        />
+      </Fragment>
     )
   }
 }
 
-class RecipeUpdateModal extends Component {
+class RecipeUpdate extends Component {
 
   constructor(props) {
     super()
@@ -352,7 +422,7 @@ class RecipeUpdateModal extends Component {
   }
 }
 
-class RecipeDeleteModal extends Component {
+class RecipeDelete extends Component {
 
   constructor(props) {
     super()
@@ -409,16 +479,10 @@ class RecipeDeleteModal extends Component {
           </p>
         </Modal.Content>
         <Modal.Actions>
-          <Button
-            onClick={ this.handleCancel }
-            color='red'
-            inverted>
+          <Button onClick={ this.handleCancel } color='red' inverted>
             <Icon name='remove' /> Cancel
           </Button>
-          <Button
-            onClick={ this.handleDelete }
-            color='green'
-            inverted>
+          <Button onClick={ this.handleDelete } color='green' inverted>
             <Icon name='checkmark' /> Yes
           </Button>
         </Modal.Actions>
@@ -434,14 +498,15 @@ class Controls extends Component {
     if ( authState === "signedIn" ) {
       return (
         <Card.Content extra>
-          <div className='ui two buttons'>
-            <RecipeUpdateModal
+          <div className='ui three buttons'>
+            <RecipeUpdate
               { ...this.props }
               item={ card.item }
               id={ card.id }
               header={ card.header }
             />
-            <RecipeDeleteModal
+            <S3ImageUpload recipeId={ card.id } />
+            <RecipeDelete
               { ...this.props }
               id={ card.id }
               header={ card.header }
@@ -466,17 +531,27 @@ class RecipeList extends Component {
   render() {
     return (
       <Card.Group centered>
-      {_.map(this.props.items, card => (
-        <Card key={card.header}>
+      { this.props.items.map((card) => (
+        <Card key={ card.header }>
           <Card.Content>
-            <Card.Header>{card.item.title}</Card.Header>
-            <Card.Meta>{card.meta}</Card.Meta>
-            <Card.Description>{card.description}</Card.Description>
+            <Card.Header>{ card.item.title }</Card.Header>
+            <Card.Meta>{ card.meta }</Card.Meta>
+            <Card.Description>
+              <div>
+                { card.photos }
+              </div>
+              <div>
+                { card.user }
+              </div>
+              <div>
+                { card.description }
+              </div>
+            </Card.Description>
           </Card.Content>
           <Controls { ...this.props } card={ card } />
         </Card>
       ))}
-      </Card.Group>
+    </Card.Group>
     )
   }
 }
@@ -516,9 +591,19 @@ class RecipeListLoader extends Component {
 
 class App extends Component {
 
-  state = {
-    searchTerm: "",
-    listKey: UUID.v4()
+  constructor(props) {
+    super(props)
+    this.state = {
+      username: "guest",
+      searchTerm: "",
+      listKey: UUID.v4()
+    }
+  }
+
+  componentDidMount() {
+    Auth.currentUserInfo().then( user => {
+      this.setState({ username: user.username })
+    })
   }
 
   handleSearch = (value) => this.setState({ searchTerm: value })
@@ -531,8 +616,10 @@ class App extends Component {
     const {
       searchTerm,
       listKey,
+      username
     } = this.state
-    const { authState } = this.props
+    const { authState, handleAuthentication } = this.props
+    console.log(username)
 
     return (
       <Router>
@@ -547,6 +634,8 @@ class App extends Component {
               successCallback={ this.onRecipeListChange }
               searchTerm={ searchTerm }
               authState={ authState }
+              username= { username }
+              handleAuthentication={ handleAuthentication }
               handleSearch={ this.handleSearch } />
               }
             />

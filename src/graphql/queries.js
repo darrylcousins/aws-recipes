@@ -8,6 +8,8 @@ export const getRecipe = `query GetRecipe($id: ID!) {
     byline
     ingredients
     method
+    user
+    photos
     ctime
     mtime
   }
@@ -25,6 +27,8 @@ export const listRecipes = `query ListRecipes(
       byline
       ingredients
       method
+      user
+      photos
       ctime
       mtime
     }
