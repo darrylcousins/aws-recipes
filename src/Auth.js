@@ -2,57 +2,68 @@
  * @file Provides the `Authentication` components
  * @author Darryl Cousins <darryljcousins@gmail.com>
  */
-import React from 'react'
-import {
-  Button,
-  Form,
-  Icon
-} from 'semantic-ui-react'
-import { SignIn } from 'aws-amplify-react'
+import React, { Fragment } from 'react'
+import { Authenticator, SignUp } from "aws-amplify-react"
+import { Auth } from "aws-amplify"
 
-export class CustomSignIn extends SignIn {
-  constructor(props) {
-    super(props);
-    this._validAuthStates = ["signIn", "signedOut", "signedUp"];
+import App from './App'
+
+export class AppWithAuth extends React.Component {
+
+  constructor(props, context) {
+    super(props, context)
+    this.state = {
+      authenticatedUser: "guest"
+    }
+    this.authenticatedUserValidStates = [
+      "guest",
+      "authenticating",
+      "authenticated"
+    ]
+    this.handleAuthStateChange = this.handleAuthStateChange.bind(this)
+    this.handleAuthentication = this.handleAuthentication.bind(this)
+  }
+
+  handleAuthStateChange(state) {
+    switch (state) {
+      case "signedIn":
+        this.setState({ authState: state, authenticatedUser: "authenticated" })
+        break
+      default:
+        this.setState({ authState: state, authenticatedUser: "guest" })
+    }
+  }
+
+  handleAuthentication(action) {
+    if (action === "login") {
+      this.setState({
+        authenticatedUser: "authenticating"
+      })
+    } else if (action === "logout") {
+      // log out the user
+      Auth.signOut()
+    }
   }
 
   render() {
+    const { authenticatedUser } = this.state
+    let hideDefault = false
+    if (authenticatedUser === "guest" || authenticatedUser === "authenticated") {
+      hideDefault = true
+    }
     return (
-      <Form>
-        <Form.Input
-          required
-          label="Username"
-          name="username"
-          id="username"
-          placeholder="Username"
-          type="text"
-          onChange={ this.handleInputChange }
-        />
-        <Form.Input
-          required
-          label="Password"
-          name="password"
-          id="password"
-          placeholder="********"
-          type="password"
-          onChange={ this.handleInputChange }
-        />
-        <Button
-          onClick={ () => super.SignIn() }
-          color='blue'>
-          <Icon name='checkmark' /> Login
-        </Button>
-        <Button
-          onClick={ () => super.changeState("forgotPassword") }
-          color='blue'>
-          <Icon name='checkmark' /> Reset Password
-        </Button>
-        <Button
-          onClick={ () => super.changeState("signUp") }
-          color='blue'>
-          <Icon name='checkmark' /> Create Account
-        </Button>
-      </Form>
+      <Fragment>
+        <Authenticator
+          authState="signIn"
+          hideDefault={ hideDefault }
+          hide={ [SignUp] }
+          onStateChange={ this.handleAuthStateChange }
+        >
+          <App
+            handleAuthentication={ this.handleAuthentication }
+          />
+        </Authenticator>
+      </Fragment>
     )
   }
 }

@@ -16,9 +16,6 @@ import { Auth } from "aws-amplify"
 import { HeaderMenu } from './components/menu'
 import { RecipeListLoader } from './components/list'
 
-import 'react-toastify/dist/ReactToastify.min.css'
-import './App.css'
-
 class App extends React.Component {
 
   constructor(props) {
@@ -32,7 +29,7 @@ class App extends React.Component {
 
   componentDidMount() {
     Auth.currentUserInfo().then( user => {
-      this.setState({ username: user.username })
+      if ( user ) this.setState({ username: user.username })
     })
   }
 

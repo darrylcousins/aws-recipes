@@ -18,6 +18,8 @@ import { graphqlOperation, API, Storage } from "aws-amplify"
 
 import { Toast } from './toast'
 
+export const PREFIX = "uploads/"
+
 export class RecipePhotoUpload extends React.Component {
 
   constructor(props) {
@@ -30,19 +32,17 @@ export class RecipePhotoUpload extends React.Component {
     this.onChange = this.onChange.bind(this)
   }
 
-  async uploadFile(item) {
-    const result = await Storage.put(
-      item.fileName, item.file, {
-          customPrefix: { public: 'uploads/' },
-          metadata: { recipeid: this.props.recipeId }
+  async uploadFile(ob) {
+    const { item } = this.props
+    Storage.put(
+      ob.fileName, ob.file, {
+          customPrefix: { public: "public/" + PREFIX },
+          level: "public",
+          metadata: { recipeid: item.id }
         }
-      )
+      ).then (result => console.log(PREFIX, result))
+        .catch(err => console.log(PREFIX, err))
 
-    console.log('Uploaded file: ', result)
-  }
-
-  async testUpload(item) {
-    console.log(item.file, item.fileName)
   }
 
   async onChange(e) {
@@ -56,10 +56,11 @@ export class RecipePhotoUpload extends React.Component {
       photos.push(fileName)
     }
 
-    await Promise.all(files.map(item => this.testUpload(item)))
+    await Promise.all(files.map(item => this.uploadFile(item)))
 
     const input = Object.assign({}, this.props.item)
     input.photos = JSON.stringify(photos)
+    input.mtime = new Date()
 
     try {
       const result = await API.graphql(graphqlOperation(mutations.updateRecipe, {input: input}))
@@ -86,7 +87,7 @@ export class RecipePhotoUpload extends React.Component {
       <Modal
         trigger={ <Button
                     basic
-                    id={ item.id }
+                    id={ `upload-${ item.id }` }
                     name={ item.header }
                     onClick={ this.handleOpen }><Icon name="image" />Photos</Button>
                     }

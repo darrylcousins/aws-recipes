@@ -25,6 +25,9 @@ export class RecipeDelete extends React.Component {
 
   async handleDelete() {
     // don't forget to delete S3 photos
+    // Storage.remove(key)
+    //     .then(result => console.log(result))
+    //         .catch(err => console.log(err));
 
     const data = { id: this.props.item.id }
 
@@ -49,17 +52,17 @@ export class RecipeDelete extends React.Component {
       <Modal
         trigger={ <Button
                     basic
-                    id={ item.id }
-                    name={ item.header }
+                    id={ `delete-${ item.id }` }
+                    name={ item.title }
                     onClick={ this.handleOpen }><Icon name="delete" />Delete</Button>
                     }
         open={this.state.modalOpen}
         onClose={this.handleClose}
         basic size='small'>
-        <Header icon='trash' content={ `Delete ${ item.header }` } />
+        <Header icon='trash' content={ `Delete ${ item.title }` } />
         <Modal.Content>
           <p>
-            Are you sure you want to delete the recipe <strong>{ item.header }?</strong>
+            Are you sure you want to delete the recipe <strong>{ item.title }</strong>?
           </p>
         </Modal.Content>
         <Modal.Actions>

@@ -16,7 +16,7 @@ export class Controls extends React.Component {
     if ( authState === "signedIn" ) {
       return (
         <Card.Content extra>
-          <div className='ui three buttons'>
+          <div className='ui three buttons mini'>
             <RecipeUpdate
               { ...this.props }
               item={ card.item }

@@ -58,8 +58,7 @@ export class RecipeUpdate extends React.Component {
     const { input } = this.state
     const { item } = this.props
 
-    const now = new Date()
-    input.mtime = now
+    input.mtime = new Date()
     input.ctime = item.ctime
     input.id = item.id
     input.user = item.user
@@ -85,27 +84,27 @@ export class RecipeUpdate extends React.Component {
   }
 
   render() {
-    const { id, header, item } = this.props
+    const { item } = this.props
     const { input } = this.state
     return (
       <Modal
         trigger={ <Button
                     basic
-                    id={ id }
-                    name={ header }
-                    onClick={ this.handleOpen }><Icon name="edit" />Edit</Button>
+                    id={ `update-${ item.id }` }
+                    name={ item.title }
+                    onClick={ this.handleOpen }><Icon name="edit" />Update</Button>
                     }
         open={this.state.modalOpen}
         onClose={this.handleClose}
         basic size='small'>
-        <Header icon='edit' content={ `Edit ${ header }` } />
+        <Header icon='edit' content={ `Edit ${ item.title }` } />
         <Modal.Content>
           <Form inverted>
             <Form.Input
               required
               label="Title"
               name="title"
-              value={ input.title ? input.title : header}
+              value={ input.title ? input.title : item.title }
               onChange={ this.handleInputChange }
             />
             <Form.Field
