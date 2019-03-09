@@ -1,0 +1,4 @@
+/* override tachyons to avoid conflict with semantic-ui */
+.outline {
+  outline: none !important;
+}

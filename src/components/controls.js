@@ -3,7 +3,7 @@
  * @author Darryl Cousins <darryljcousins@gmail.com>
  */
 import React from 'react'
-import { Card } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 
 import { RecipePhotoUpload } from './photos'
 import { RecipeUpdate } from './update'
@@ -15,8 +15,9 @@ export class Controls extends React.Component {
     const { authState, card } = this.props
     if ( authState === "signedIn" ) {
       return (
-        <Card.Content extra>
-          <div className='ui three buttons mini'>
+        <Button.Group
+          size="medium"
+          color="blue">
             <RecipeUpdate
               { ...this.props }
               item={ card.item }
@@ -29,8 +30,7 @@ export class Controls extends React.Component {
               { ...this.props }
               item={ card.item }
             />
-          </div>
-        </Card.Content>
+          </Button.Group>
       )
     }
     return null

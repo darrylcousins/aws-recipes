@@ -51,14 +51,15 @@ export class RecipeDelete extends React.Component {
     return (
       <Modal
         trigger={ <Button
-                    basic
                     id={ `delete-${ item.id }` }
+                    title={ `Delete ${ item.title }` }
                     name={ item.title }
-                    onClick={ this.handleOpen }><Icon name="delete" />Delete</Button>
+                    icon="delete"
+                    onClick={ this.handleOpen } />
                     }
         open={this.state.modalOpen}
         onClose={this.handleClose}
-        basic size='small'>
+        >
         <Header icon='trash' content={ `Delete ${ item.title }` } />
         <Modal.Content>
           <p>

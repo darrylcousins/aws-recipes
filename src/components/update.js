@@ -89,14 +89,15 @@ export class RecipeUpdate extends React.Component {
     return (
       <Modal
         trigger={ <Button
-                    basic
+                    title={ `Update ${ item.title }` }
                     id={ `update-${ item.id }` }
                     name={ item.title }
-                    onClick={ this.handleOpen }><Icon name="edit" />Update</Button>
+                    icon="edit"
+                    onClick={ this.handleOpen } />
                     }
         open={this.state.modalOpen}
         onClose={this.handleClose}
-        basic size='small'>
+        >
         <Header icon='edit' content={ `Edit ${ item.title }` } />
         <Modal.Content>
           <Form inverted>

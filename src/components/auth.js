@@ -21,6 +21,7 @@ export class AuthButton extends React.Component {
       return (
         <Menu.Item
           name="logout"
+          title="Logout"
           active={ activeItem === "logout" }
           onClick={ () => handleAuthentication(action) }>
           <Icon name="sign-out" />Logout { username }
@@ -30,6 +31,7 @@ export class AuthButton extends React.Component {
     return (
       <Menu.Item
         name="login"
+        title="Administration Login"
         active={ activeItem === "login" }
         onClick={ () => handleAuthentication(action) }>
         <Icon name="sign-in" />Login

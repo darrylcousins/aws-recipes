@@ -15,6 +15,7 @@ import { Auth } from "aws-amplify"
 
 import { HeaderMenu } from './components/menu'
 import { RecipeListLoader } from './components/list'
+import { RecipeDetail } from './components/detail'
 
 class App extends React.Component {
 
@@ -39,11 +40,14 @@ class App extends React.Component {
     this.setState({ listKey: UUID.v4() })
   }
 
+  selectRecipe = (id) => this.setState({ currentRecipe: id })
+
   render() {
     const {
       searchTerm,
       listKey,
-      username
+      username,
+      currentRecipe
     } = this.state
     const { authState, handleAuthentication } = this.props
 
@@ -62,16 +66,26 @@ class App extends React.Component {
               authState={ authState }
               username= { username }
               handleAuthentication={ handleAuthentication }
+              selectRecipe={ this.selectRecipe }
               handleSearch={ this.handleSearch } />
               }
             />
           <Route
-            exact
+            path='/'
+            render = { () => {
+              if (currentRecipe) return <RecipeDetail
+                    currentRecipe={ currentRecipe }
+                    authState={ authState }
+                    selectRecipe={ this.selectRecipe } />
+              return null
+            } } />
+          <Route
             path='/'
             render = { props => <RecipeListLoader
               { ...props }
               key={ listKey }
               authState={ authState }
+              selectRecipe={ this.selectRecipe }
               successCallback={ this.onRecipeListChange }
               searchTerm={ searchTerm } />
               }

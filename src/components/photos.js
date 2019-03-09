@@ -7,6 +7,8 @@ import {
   Header,
   Button,
   Modal,
+  Placeholder,
+  Image,
   Icon
 } from 'semantic-ui-react'
 import UUID from 'uuid'
@@ -19,6 +21,68 @@ import { graphqlOperation, API, Storage } from "aws-amplify"
 import { Toast } from './toast'
 
 export const PREFIX = "uploads/"
+
+export class RecipePhoto extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = { loading: true, src: null }
+    this.getPhoto = this.getPhoto.bind(this)
+    this.loadPhoto = this.loadPhoto.bind(this)
+    this.placeholder = "https://s3.amazonaws.com/awsrecipes4a7ca1dbafd144a2b2de840a7e9aff3b/public/uploads/wireframe.png"
+  }
+
+  componentDidMount() {
+    setTimeout( () => this.getPhoto(), 2000 )
+  }
+
+  loadPhoto(src) {
+    const self = this
+    let image = new window.Image()
+    image.onload = () => {
+      self.setState({ src: src, loading: false })
+    }
+    image.src = src
+  }
+
+  async getPhoto() {
+    const { item } = this.props
+    const photos = JSON.parse(item.photos)
+    if (photos.length === 0) {
+      this.loadPhoto(this.placeholder)
+    } else {
+      const key = photos[0]
+      Storage.get(PREFIX + key)
+        .then(result => {
+          this.loadPhoto(result)
+        })
+        .catch(err => {
+          this.loadPhoto(this.placeholder)
+          toast.error("An error occurred")
+        })
+    }
+  }
+
+  render() {
+    const { loading, src } = this.state
+    if ( loading ) {
+      return (
+        <div
+          style={ {
+            float: "right",
+            } }>
+          <Placeholder>
+            <Placeholder.Image rectangular />
+          </Placeholder>
+        </div>
+      )
+    } else {
+      return (
+        <Image { ...this.props } src={ src } />
+      )
+    }
+  }
+}
 
 export class RecipePhotoUpload extends React.Component {
 
@@ -86,14 +150,15 @@ export class RecipePhotoUpload extends React.Component {
     return (
       <Modal
         trigger={ <Button
-                    basic
                     id={ `upload-${ item.id }` }
+                    title="Add Or Update Photo"
                     name={ item.header }
-                    onClick={ this.handleOpen }><Icon name="image" />Photos</Button>
+                    icon="image outline"
+                    onClick={ this.handleOpen } />
                     }
         open={this.state.modalOpen}
         onClose={this.handleClose}
-        basic size='small'>
+        >
         <Header icon='trash' content="Upload Photos" />
         <Modal.Content>
           <p>

@@ -12,8 +12,10 @@ import aws_config from "./aws-exports"
 
 import { AppWithAuth } from './Auth'
 
+import 'tachyons/css/tachyons.min.css'
 import 'react-toastify/dist/ReactToastify.min.css'
 import 'semantic-ui-css/semantic.min.css'
+import './index.css'
 
 Amplify.configure(aws_config)
 

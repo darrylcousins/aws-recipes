@@ -29,7 +29,7 @@ export class HeaderMenu extends React.Component {
 
   handleItemClick = (e, { name }) => {
     this.setState({ activeItem: name })
-    this.props.history.push("/")
+    this.props.selectRecipe(null)
   }
 
   handleSearchInput = (e, { value }) => {
@@ -55,9 +55,12 @@ export class HeaderMenu extends React.Component {
       handleAuthentication
     } = this.props
     return (
-      <Menu stackable inverted>
+      <Menu
+        stackable
+        inverted>
         <Menu.Item
           name="recipes"
+          title="Recipes Home"
           active={ activeItem === "recipes" }
           onClick={ this.handleItemClick }>
           Recipes&nbsp;<small>v0.1.0</small>
@@ -78,7 +81,8 @@ export class HeaderMenu extends React.Component {
           </Menu.Item>
           <RecipeAdd { ...this.props } />
           <Menu.Item
-            href="https://github.com/darrylcousins/aws-nautilus"
+            href="https://github.com/darrylcousins/aws-recipe"
+            title="Github Repository"
             target="_blank">
             <Icon name="github" />
           </Menu.Item>
