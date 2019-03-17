@@ -22,7 +22,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      username: "guest",
+      username: "",
       searchTerm: "",
       listKey: UUID.v4()
     }
@@ -35,6 +35,7 @@ class App extends React.Component {
   }
 
   handleSearch = (value) => this.setState({ searchTerm: value })
+
   // the magic arbitary change to force reload on the recipe list
   onRecipeListChange = () => {
     this.setState({ listKey: UUID.v4() })

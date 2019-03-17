@@ -27,7 +27,17 @@ export class RecipeDetail extends React.Component {
         variables={ vars }>
         {({ data, loading, errors }) => {
           if (loading) return <Loader active />
-          if (errors.length) return <Error data={ errors } />
+          if (errors) {
+            if (errors.length) return <Error data={ errors } />
+          }
+
+          if (!data) {
+            return <Error data={ [{
+                errorType: "Network",
+                message: "No recipe detail returned",
+                path: ""
+              }] } />
+          }
 
           const item = data.getRecipe
 

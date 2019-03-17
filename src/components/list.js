@@ -58,28 +58,36 @@ export class RecipeListLoader extends React.Component {
     let variables = { filter: null }
     if (search) variables.filter = search
 
-    return (
-      <Connect
+    return (  <Connect
         query={ graphqlOperation(queries.listRecipes, variables) }
         >
         {({ data, loading, errors }) => {
           if (loading) return <Loader active />
-          if (errors.length) return <Error data={ errors } />
+          if (errors)  if (errors.length) return <Error data={ errors } />
 
-          const cards = data.listRecipes.items.map(item => ({
-            item: item,
-            header: item.title,
-            meta: "Last updated: " + new Date(item.mtime).toLocaleString(),
-            description: item.byline,
-            id: item.id
-          }))
+          if (data) {
+            const cards = data.listRecipes.items.map(item => ({
+              item: item,
+              header: item.title,
+              meta: "Last updated: " + new Date(item.mtime).toLocaleString(),
+              description: item.byline,
+              id: item.id
+            }))
 
-          return (
-            <RecipeList
-              { ...this.props }
-              selectRecipe={ selectRecipe }
-              items={ cards } />
-          )
+            return (
+              <RecipeList
+                { ...this.props }
+                selectRecipe={ selectRecipe }
+                items={ cards } />
+            )
+          }
+
+          return <Error data={ [{
+              errorType: "Network",
+              message: "No recipe list returned",
+              path: ""
+            }] } />
+
         }}
       </Connect>
     )

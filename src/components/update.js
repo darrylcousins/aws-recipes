@@ -100,7 +100,7 @@ export class RecipeUpdate extends React.Component {
         >
         <Header icon='edit' content={ `Edit ${ item.title }` } />
         <Modal.Content>
-          <Form inverted>
+          <Form>
             <Form.Input
               required
               label="Title"
